@@ -274,7 +274,7 @@ public class AAMVAParser {
     var parsedFirstName: String? {
         return parseString(key: FieldKey.firstName)
             ?? parseString(key: FieldKey.givenName)?.trimmedSplitByComma.first
-            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.first
+            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.dropFirst().first
     }
     
     var parsedMiddleNames: [String] {
@@ -288,7 +288,7 @@ public class AAMVAParser {
         }
         
         if let driveLicenseName = parseString(key: FieldKey.driverLicenseName) {
-            let parts = driveLicenseName.trimmedSplitByComma.dropFirst().dropLast()
+            let parts = driveLicenseName.trimmedSplitByComma.dropFirst().dropFirst()
             return Array(parts)
         }
         
@@ -297,7 +297,7 @@ public class AAMVAParser {
     
     var parsedLastName: String? {
         return parseString(key: FieldKey.lastName)
-            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.last
+            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.first
     }
 
     var parsedNameSuffix: NameSuffix? {
