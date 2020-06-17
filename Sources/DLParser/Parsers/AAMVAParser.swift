@@ -272,9 +272,11 @@ public class AAMVAParser {
     // MARK: - Field Parsing
     
     var parsedFirstName: String? {
-        return parseString(key: FieldKey.firstName)
-            ?? parseString(key: FieldKey.givenName)?.trimmedSplitByComma.first
-            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.dropFirst().first
+        let firstNameField = parseString(key: FieldKey.firstName)?.split(separator: " ").map(String.init).first
+        let givenNameField = parseString(key: FieldKey.givenName)?.trimmedSplitByComma.first?.split(separator: " ").map(String.init).first
+        return firstNameField
+            ?? givenNameField
+            ?? parseString(key: FieldKey.driverLicenseName)?.trimmedSplitByComma.dropFirst().first?.split(separator: " ").map(String.init).first
     }
     
     var parsedMiddleNames: [String] {
@@ -283,13 +285,31 @@ public class AAMVAParser {
         }
         
         if let givenName = parseString(key: FieldKey.givenName) {
-            let parts = givenName.trimmedSplitByComma.dropFirst()
-            return Array(parts)
+            
+            let parts = givenName.trimmedSplitByComma
+            
+            if (parts.count == 1) {
+                // no comma split on given name, return space delimited values after the first
+                return Array(givenName.split(separator: " ").dropFirst().map(String.init))
+            } else {
+                return Array(parts.dropFirst())
+            }
         }
         
         if let driveLicenseName = parseString(key: FieldKey.driverLicenseName) {
-            let parts = driveLicenseName.trimmedSplitByComma.dropFirst().dropFirst()
-            return Array(parts)
+            let parts = driveLicenseName.trimmedSplitByComma
+            
+            if (parts.count == 1) {
+                // no commas, middle name will be the second value split by space
+                return Array(driveLicenseName.split(separator: " ").map(String.init).dropFirst().dropLast())
+            } else if (parts.count == 2) {
+                // one comma, middle name will be the second part, then second value split by space
+                return Array(parts.dropFirst().split(separator: " ").map(String.init).dropFirst())
+            } else {
+                // two commas, middle name will be the third value
+                return Array(parts.dropFirst().dropFirst())
+            }
+            
         }
         
         return []
